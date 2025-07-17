@@ -1,3 +1,5 @@
+using Api.Repositories.Implementations;
+using Api.Repositories.Interfaces;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy(allowLocalhost,
         policy => { policy.WithOrigins("http://localhost:3000", "http://localhost"); });
 });
+
+builder.Services.AddTransient<IEmployeeRepository, MockEmployeeRepository>();
+builder.Services.AddTransient<IDependentRepository, MockDependentRepository>();
 
 var app = builder.Build();
 
