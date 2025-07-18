@@ -17,34 +17,11 @@ public class EmployeesController : ControllerBase
         _employeeService = employeeService;
     }
 
-    [SwaggerOperation(Summary = "Get employee by id")]
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> Get(int id)
-    {
-        var employeeDataResponse = await _employeeService.GetEmployeeAsync(id);
-
-        if (employeeDataResponse.StatusCode != HttpStatusCode.OK) 
-        {
-            return StatusCode((int)employeeDataResponse.StatusCode, employeeDataResponse.Message);
-        }
-
-        return new ApiResponse<GetEmployeeDto>
-        {
-            Data = employeeDataResponse.EmployeeData,
-            Success = true
-        };
-    }
-
     [SwaggerOperation(Summary = "Get all employees")]
     [HttpGet("")]
     public async Task<ActionResult<ApiResponse<List<GetEmployeeDto>>>> GetAll()
     {
         var employeeDataResponse = await _employeeService.GetAllAsync();
-
-        if (employeeDataResponse.StatusCode != HttpStatusCode.OK)
-        {
-            return StatusCode((int)employeeDataResponse.StatusCode, employeeDataResponse.Message);
-        }
 
         var result = new ApiResponse<List<GetEmployeeDto>>
         {
@@ -53,5 +30,24 @@ public class EmployeesController : ControllerBase
         };
 
         return result;
+    }
+
+    [SwaggerOperation(Summary = "Get employee by id")]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> Get(int id)
+    {
+        var employeeDataResponse = await _employeeService.GetEmployeeAsync(id);
+
+        if (employeeDataResponse.Status == Status.NotFound)
+            return NotFound();
+
+        if (employeeDataResponse.Status == Status.InvalidData)
+            return StatusCode(500, employeeDataResponse.Message);
+
+        return new ApiResponse<GetEmployeeDto>
+        {
+            Data = employeeDataResponse.EmployeeData,
+            Success = true
+        };
     }
 }

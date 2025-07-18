@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -62,6 +61,7 @@ namespace ApiTests.UnitTests
         {
             GivenSomeEmployees();
             await WhenGetEmployees();
+            ThenStatusIsSuccess();
             ThenResponseEmployeeDataIsExpectedDtoList();
         }
 
@@ -70,10 +70,12 @@ namespace ApiTests.UnitTests
         {
             GivenEmployeesIncludesEmployeeWithPartnersExceedingMaximumOf(1);
             await WhenGetEmployees();
+            ThenStatusIsSuccess();
             ThenResponseEmployeeDataIsExpectedDtoList();
         }
 
         #endregion
+
         #region Given
         private void GivenEmployeeWithSomeNumberOfPartners(int numberOfPartners)
         {
@@ -141,12 +143,12 @@ namespace ApiTests.UnitTests
         #region Then
         private void ThenResponseEmployeeDataStatusCodeIsNotFound()
         {
-            Assert.Equal(HttpStatusCode.NotFound, SomeGetEmployeeDataResponse?.StatusCode);
+            Assert.Equal(Status.NotFound, SomeGetEmployeeDataResponse?.Status);
         }
 
         private void ThenResponseEmployeeDataStatusCodeIsInternalServerError()
         {
-            Assert.Equal(HttpStatusCode.InternalServerError, SomeGetEmployeeDataResponse?.StatusCode);
+            Assert.Equal(Status.InvalidData, SomeGetEmployeeDataResponse?.Status);
         }
 
         private void ThenResponseEmployeeDataStatusCodeIsExpectedErrorMessage()
@@ -163,6 +165,11 @@ namespace ApiTests.UnitTests
         private void ThenResponseEmployeeDataIsExpectedDtoList()
         {
             Assert.Equal(SomeGetEmployeeDtos, SomeGetEmployeesDataResponse?.EmployeeData);
+        }
+
+        private void ThenStatusIsSuccess()
+        {
+            Assert.Equal(Status.Success, SomeGetEmployeesDataResponse?.Status);
         }
 
         #endregion

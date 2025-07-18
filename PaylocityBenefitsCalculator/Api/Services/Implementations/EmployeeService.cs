@@ -39,7 +39,7 @@ namespace Api.Services.Implementations
                 }
             }
 
-            responseObject.StatusCode = HttpStatusCode.OK;
+            responseObject.Status = Status.Success;
             return responseObject;
         }
 
@@ -49,7 +49,7 @@ namespace Api.Services.Implementations
             var employee = await _employeeRepo.GetEmployeeAsync(id);
             if (employee is null)
             {
-                responseObject.StatusCode = HttpStatusCode.NotFound;
+                responseObject.Status = Status.NotFound;
                 return responseObject;
             }
 
@@ -58,13 +58,13 @@ namespace Api.Services.Implementations
             // We could enforce this at the repo level (return null if no employee with this id found that violates our constraint) but there is some value of handling it here so that we can apply business logic (what if we wanted to return a message indicating that the client data is faulted, as below?)
             if (employee.Dependents.Any() && !EmployeeHelper.EmployeePartnersValid(employee.Dependents, 1))
             {
-                responseObject.StatusCode = HttpStatusCode.InternalServerError;
+                responseObject.Status = Status.InvalidData;
                 responseObject.Message = $"Employee {employee.FirstName} {employee.LastName} has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum";
                 return responseObject;
             }
 
             responseObject.EmployeeData = employee;
-            responseObject.StatusCode = HttpStatusCode.OK;
+            responseObject.Status = Status.Success;
             return responseObject;
         }
     }
