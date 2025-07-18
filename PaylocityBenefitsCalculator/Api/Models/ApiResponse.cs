@@ -1,4 +1,6 @@
-﻿namespace Api.Models;
+﻿using System.Net;
+
+namespace Api.Models;
 
 public class ApiResponse<T>
 {

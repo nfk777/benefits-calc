@@ -10,7 +10,7 @@ namespace Api.Repositories.Implementations
     {
         // Mocks async repository reads from a database, which could be managed by an ORM such as EntityFramework. These mocked calls are synchronous but I am making the contract async because the actual implementation and contract would likely be async and return a Task<T>
         // As this is a mock implementation, I'm not wrapping the logic for these repo methods in try/catch blocks but I would likely do this in a real implementation especially to log exceptions and to help handle exceptions gracefully
-        public async Task<List<GetEmployeeDto>> GetAllEmployeesAsync()
+        public async Task<IEnumerable<GetEmployeeDto>> GetAllEmployeesAsync()
         {
             return MockEmployees;
         }
@@ -85,7 +85,51 @@ namespace Api.Repositories.Implementations
                         DateOfBirth = new DateTime(1974, 1, 2)
                     }
                 }
-            }
+            },
+            new ()
+            {
+                Id = 4,
+                FirstName = "Stacy",
+                LastName = "Fakename",
+                Salary = 100341.34m,
+                DateOfBirth = new DateTime(1989, 11, 12),
+                // This list of dependents violates our constraint on domestic partners/spouses
+                Dependents = new List<GetDependentDto>
+                {
+                    new ()
+                    {
+                        Id = 1,
+                        FirstName = "Spouse",
+                        LastName = "Fakename",
+                        Relationship = Relationship.Spouse,
+                        DateOfBirth = new DateTime(1992, 3, 3)
+                    },
+                    new()
+                    {
+                        Id = 2,
+                        FirstName = "Child1",
+                        LastName = "Fakename",
+                        Relationship = Relationship.Child,
+                        DateOfBirth = new DateTime(2017, 6, 23)
+                    },
+                    new()
+                    {
+                        Id = 3,
+                        FirstName = "Child2",
+                        LastName = "Fakename",
+                        Relationship = Relationship.Child,
+                        DateOfBirth = new DateTime(2019, 5, 18)
+                    },
+                    new ()
+                    {
+                        Id = 6,
+                        FirstName = "Domesticpartner",
+                        LastName = "Fakename",
+                        Relationship = Relationship.DomesticPartner,
+                        DateOfBirth = new DateTime(1993, 4, 4)
+                    }
+                }
+            },
         };
     }
 }

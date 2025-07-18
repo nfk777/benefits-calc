@@ -104,5 +104,19 @@ public class EmployeeIntegrationTests : IntegrationTest
         var response = await HttpClient.GetAsync($"/api/v1/employees/{int.MinValue}");
         await response.ShouldReturn(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task WhenAskedForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturn500()
+    {
+        var response = await HttpClient.GetAsync($"/api/v1/employees/4");
+        await response.ShouldReturn(HttpStatusCode.InternalServerError);
+    }
+
+    [Fact]
+    public async Task WhenAskedForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturnExpectedMessage()
+    { 
+        var response = await HttpClient.GetAsync($"/api/v1/employees/4");
+        await response.ShouldReturn("Employee Stacy Fakename has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum");
+    }
 }
 

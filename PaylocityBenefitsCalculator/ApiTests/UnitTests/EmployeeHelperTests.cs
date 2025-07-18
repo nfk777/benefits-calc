@@ -81,16 +81,6 @@ namespace ApiTests.UnitTests
             };
         }
 
-        private void GivenDependentsIncludesSpouse()
-        {
-            SomeDependents.Add(SomeSpouse);
-        }
-
-        private void GivenDependentsIncludesDomesticPartner()
-        {
-            SomeDependents.Add(SomeDomesticPartner);
-        }
-
         private void GivenMaxPartnersOf(int max)
         {
             MaximumPartners = max;
@@ -131,23 +121,6 @@ namespace ApiTests.UnitTests
         #endregion
 
         #region Variables
-        private readonly GetDependentDto SomeSpouse = new()
-        {
-            Id = 1,
-            FirstName = "Spouse",
-            LastName = "Morant",
-            Relationship = Relationship.Spouse,
-            DateOfBirth = new DateTime(1998, 3, 3)
-        };
-
-        private readonly GetDependentDto SomeDomesticPartner = new()
-        {
-            Id = 4,
-            FirstName = "DP",
-            LastName = "Jordan",
-            Relationship = Relationship.DomesticPartner,
-            DateOfBirth = new DateTime(1974, 1, 2)
-        };
         private Fixture _fixture;
         private bool PartnersValid;
         private int MaximumPartners;

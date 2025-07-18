@@ -1,8 +1,11 @@
 ﻿using Api.Dtos.Employee;
 using Api.Models;
 using Api.Repositories.Interfaces;
+using Api.Services.Implementations;
+using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 
 namespace Api.Controllers;
 
@@ -10,24 +13,26 @@ namespace Api.Controllers;
 [Route("api/v1/[controller]")]
 public class EmployeesController : ControllerBase
 {
-    private readonly IEmployeeRepository _employeeRepo;
-    public EmployeesController(IEmployeeRepository employeeRepo)
+    private readonly IEmployeeService _employeeService;
+    public EmployeesController(IEmployeeService employeeService)
     {
-        _employeeRepo = employeeRepo;
+        _employeeService = employeeService;
     }
 
     [SwaggerOperation(Summary = "Get employee by id")]
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> Get(int id)
     {
-        var employee = await _employeeRepo.GetEmployeeAsync(id);
+        var employeeDataResponse = await _employeeService.GetEmployeeAsync(id);
 
-        if (employee is null)
-            return NotFound();
+        if (employeeDataResponse.StatusCode != HttpStatusCode.OK) 
+        {
+            return StatusCode((int)employeeDataResponse.StatusCode, employeeDataResponse.Message);
+        }
 
         return new ApiResponse<GetEmployeeDto>
         {
-            Data = employee,
+            Data = employeeDataResponse.EmployeeData,
             Success = true
         };
     }
@@ -36,11 +41,16 @@ public class EmployeesController : ControllerBase
     [HttpGet("")]
     public async Task<ActionResult<ApiResponse<List<GetEmployeeDto>>>> GetAll()
     {
-        var employees = await _employeeRepo.GetAllEmployeesAsync();
+        var employeeDataResponse = await _employeeService.GetAllAsync();
+
+        if (employeeDataResponse.StatusCode != HttpStatusCode.OK)
+        {
+            return StatusCode((int)employeeDataResponse.StatusCode, employeeDataResponse.Message);
+        }
 
         var result = new ApiResponse<List<GetEmployeeDto>>
         {
-            Data = employees,
+            Data = employeeDataResponse.EmployeeData,
             Success = true
         };
 
