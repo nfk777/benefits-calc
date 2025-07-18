@@ -1,23 +1,29 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
-using Api.Dtos.Dependent;
+﻿using Api.Dtos.Dependent;
 using Api.Dtos.Employee;
 using Api.Models;
-using Xunit;
+using Api.Repositories.Interfaces;
 
-namespace ApiTests.IntegrationTests;
-
-public class EmployeeIntegrationTests : IntegrationTest
+namespace Api.Repositories.Implementations
 {
-    [Fact]
-    public async Task WhenAskedForAllEmployees_ShouldReturnAllEmployees()
+    // Implements an interface so this mock could be swapped out for an actual implementation in the future without altering existing contracts
+    public class MockEmployeeRepository : IEmployeeRepository
     {
-        var response = await HttpClient.GetAsync("/api/v1/employees");
-        var employees = new List<GetEmployeeDto>
+        // Mocks async repository reads from a database, which could be managed by an ORM such as EntityFramework. These mocked calls are synchronous but I am making the contract async because the actual implementation and contract would likely be async and return a Task<T>
+        // As this is a mock implementation, I'm not wrapping the logic for these repo methods in try/catch blocks but I would likely do this in a real implementation especially to log exceptions and to help handle exceptions gracefully
+        public async Task<List<GetEmployeeDto>> GetAllEmployeesAsync()
         {
-            new()
+            return MockEmployees;
+        }
+
+        // The T type is marked as nullable to represent that in the case where no matching element is found, null is an acceptable return type. We will handle nulls in the consuming code.
+        public async Task<GetEmployeeDto?> GetEmployeeAsync(int id)
+        {
+            return MockEmployees.FirstOrDefault(e => e.Id == id);
+        }   
+
+        private readonly List<GetEmployeeDto> MockEmployees = new ()
+        {
+            new ()
             {
                 Id = 1,
                 FirstName = "LeBron",
@@ -25,16 +31,17 @@ public class EmployeeIntegrationTests : IntegrationTest
                 Salary = 75420.99m,
                 DateOfBirth = new DateTime(1984, 12, 30)
             },
-            new()
+            new ()
             {
                 Id = 2,
                 FirstName = "Ja",
                 LastName = "Morant",
                 Salary = 92365.22m,
                 DateOfBirth = new DateTime(1999, 8, 10),
+                // Leaving the included dependents in the GetEmployeeDto model in place because in a database this relationship would be modeled as One to Many with the Dependents table having a ForeignKey column of EmployeeId which would allow us to return an Employee with their dependents using an approprite sql query or an ORM with syntax (i.e. .Include(x => x.Dependents) in EntityFramework
                 Dependents = new List<GetDependentDto>
                 {
-                    new()
+                    new ()
                     {
                         Id = 1,
                         FirstName = "Spouse",
@@ -80,29 +87,5 @@ public class EmployeeIntegrationTests : IntegrationTest
                 }
             }
         };
-        await response.ShouldReturn(HttpStatusCode.OK, employees);
-    }
-
-    [Fact]
-    public async Task WhenAskedForAnEmployee_ShouldReturnCorrectEmployee()
-    {
-        var response = await HttpClient.GetAsync("/api/v1/employees/1");
-        var employee = new GetEmployeeDto
-        {
-            Id = 1,
-            FirstName = "LeBron",
-            LastName = "James",
-            Salary = 75420.99m,
-            DateOfBirth = new DateTime(1984, 12, 30)
-        };
-        await response.ShouldReturn(HttpStatusCode.OK, employee);
-    }
-    
-    [Fact]
-    public async Task WhenAskedForANonexistentEmployee_ShouldReturn404()
-    {
-        var response = await HttpClient.GetAsync($"/api/v1/employees/{int.MinValue}");
-        await response.ShouldReturn(HttpStatusCode.NotFound);
     }
 }
-
