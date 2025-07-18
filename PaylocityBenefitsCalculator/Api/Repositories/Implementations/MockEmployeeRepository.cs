@@ -8,8 +8,8 @@ namespace Api.Repositories.Implementations
     // Implements an interface so this mock could be swapped out for an actual implementation in the future without altering existing contracts
     public class MockEmployeeRepository : IEmployeeRepository
     {
-        // Mocks an async repository read from a database managed by an ORM such as EntityFramework. This mocked call is synchronous but I am leaving it as async because the actual implementation and contract would likely be async and return a Task<List<GetEmployeeDto>>
-        // As this is a mock, I'm not wrapping the logic for these repo methods in try/catch blocks but I would likely do this in a real implementation especially to log exceptions and to help handle exceptions gracefully
+        // Mocks async repository reads from a database, which could be managed by an ORM such as EntityFramework. These mocked calls are synchronous but I am making the contract async because the actual implementation and contract would likely be async and return a Task<T>
+        // As this is a mock implementation, I'm not wrapping the logic for these repo methods in try/catch blocks but I would likely do this in a real implementation especially to log exceptions and to help handle exceptions gracefully
         public async Task<List<GetEmployeeDto>> GetAllEmployeesAsync()
         {
             return MockEmployees;
@@ -38,6 +38,7 @@ namespace Api.Repositories.Implementations
                 LastName = "Morant",
                 Salary = 92365.22m,
                 DateOfBirth = new DateTime(1999, 8, 10),
+                // Leaving the included dependents in the GetEmployeeDto model in place because in a database this relationship would be modeled as One to Many with the Dependents table having a ForeignKey column of EmployeeId which would allow us to return an Employee with their dependents using an approprite sql query or an ORM with syntax (i.e. .Include(x => x.Dependents) in EntityFramework
                 Dependents = new List<GetDependentDto>
                 {
                     new ()

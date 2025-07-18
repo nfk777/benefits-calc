@@ -6,7 +6,7 @@ namespace Api.Repositories.Implementations
 {
     public class MockDependentRepository : IDependentRepository
     {
-        // Mocks an async repository read from a database managed by an ORM such as EntityFramework. This mocked call is synchronous but I am leaving it as async because the actual implementation and contract would likely be async and return a Task<List<GetEmployeeDto>>
+        // Mocks async repository reads from a database, which could be managed by an ORM such as EntityFramework. These mocked calls are synchronous but I am making the contract async because the actual implementation and contract would likely be async and return a Task<T>
         // As this is a mock, I'm not wrapping the logic for these repo methods in try/catch blocks but I would likely do this in a real implementation especially to log exceptions and to help handle exceptions gracefully
         public async Task<List<GetDependentDto>> GetAllDependentsAsync()
         {
