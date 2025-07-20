@@ -10,12 +10,14 @@ namespace Api.Repositories.Implementations
     {
         // Mocks async repository reads from a database, which could be managed by an ORM such as EntityFramework. These mocked calls are synchronous but I am making the contract async because the actual implementation and contract would likely be async and return a Task<T>
         // As this is a mock implementation, I'm not wrapping the logic for these repo methods in try/catch blocks but I would likely do this in a real implementation especially to log exceptions and to help handle exceptions gracefully
+        // Normally this would return a Task<IEnumerable<Employee>> where Employee is the Model rather than the dto, but since the two classes currently have the same properties I am opting not to do that to skip avoid the need to map model to dto
         public async Task<IEnumerable<GetEmployeeDto>> GetAllEmployeesAsync()
         {
             return MockEmployees;
         }
 
         // The T type is marked as nullable to represent that in the case where no matching element is found, null is an acceptable return type. We will handle nulls in the consuming code.
+        // Normally this would return a Task<Employee?> where Employee is the Model rather than the dto, but since the two classes currently have the same properties I am opting not to do that to skip avoid the need to map model to dto
         public async Task<GetEmployeeDto?> GetEmployeeAsync(int id)
         {
             return MockEmployees.FirstOrDefault(e => e.Id == id);

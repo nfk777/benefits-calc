@@ -33,6 +33,7 @@ builder.Services.AddTransient<IEmployeeService, EmployeeService>();
 builder.Services.AddTransient<IPaycheckService, PaycheckService>();
 builder.Services.AddTransient<IEmployeeRepository, MockEmployeeRepository>();
 builder.Services.AddTransient<IDependentRepository, MockDependentRepository>();
+builder.Services.AddTransient<IPaycheckConfigurationRepository, MockPaycheckConfigurationRepository>();
 
 var app = builder.Build();
 

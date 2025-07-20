@@ -2,6 +2,7 @@
 using Api.Dtos.Employee;
 using Api.Helpers;
 using Api.Models;
+using Api.Repositories.Interfaces;
 using Api.Services.Interfaces;
 
 namespace Api.Services.Implementations
@@ -9,24 +10,28 @@ namespace Api.Services.Implementations
     public class PaycheckService : IPaycheckService
     {
         private IEmployeeService _employeeService;
+        private IPaycheckConfigurationRepository _paycheckConfigRepo;
 
-        private readonly decimal _baseBenefitsCost = 1000.00m;
-        private readonly decimal _dependentCost = 600.00m;
-        private readonly decimal _additionalBenefitCostThreshold = 80000.00m;
-        private readonly decimal _highSalaryYearlyCharge = 0.02m;
-        private readonly decimal _payChecksPerMonth = 2.17m;
-        private readonly int _dependantAgeThreshold = 50;
-        private readonly decimal _monthlyDependentAgeCharge = 200.00m;
-        private readonly int _checksPerYear = 26;
-
-        public PaycheckService(IEmployeeService employeeService)
+        public PaycheckService(IEmployeeService employeeService, IPaycheckConfigurationRepository paycheckConfigRepo)
         {
             _employeeService = employeeService;
+            _paycheckConfigRepo = paycheckConfigRepo;
         }
 
         public async Task<EmployeeDataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int id)
         {
             EmployeeDataResponse<GetEmployeePaycheckDto> responseObject = new();
+
+            // Get PaycheckConfiguration object and return an invalid data status if no configuration exists as we need it to calculate paychecks
+            PaycheckConfiguration paycheckConfig = await _paycheckConfigRepo.GetPaycheckConfigurationAsync();
+            if (paycheckConfig is null)
+            {
+                responseObject.Status = Status.InvalidData;
+                responseObject.Message = "Paycheck calculation cannot be completed at this time, please try again later";
+                return responseObject;
+            }
+
+            // Get the employee and if the employee is invalid or not found return immediately with appropriate status and error message
             var employeeDataResponse = await _employeeService.GetEmployeeAsync(id);
 
             if (employeeDataResponse.Status != Status.Success || employeeDataResponse.EmployeeData is null)
@@ -38,30 +43,41 @@ namespace Api.Services.Implementations
 
             var employee = employeeDataResponse.EmployeeData;
             GetEmployeePaycheckDto employeePaycheckDto = new();
-            employeePaycheckDto.GrossPaycheckSalary = Math.Round(employee.Salary / 26, 2);
-            employeePaycheckDto.BaseBenefitsDeduction = EmployeeHelper.CalculateEmployeeBasePaycheckDeduction(_baseBenefitsCost, _payChecksPerMonth);
-            employeePaycheckDto.DependentsDeduction = GetDependentPaycheckDeduction(employee.Dependents);
-            employeePaycheckDto.HighWageEarnerDeduction = GetHighWageEarnerPaycheckDeduction(employee.Salary);
+            employeePaycheckDto.GrossPaycheckSalary = Math.Round(employee.Salary / paycheckConfig.ChecksPerYear, 2);
+            employeePaycheckDto.BaseBenefitsDeduction = EmployeeHelper.CalculateEmployeeBasePaycheckDeduction(paycheckConfig.BaseBenefitsCost, paycheckConfig.ChecksPerMonth);
+            employeePaycheckDto.DependentsDeduction = GetDependentPaycheckDeduction(
+                employee.Dependents, 
+                paycheckConfig.MonthlyDeductionPerDependent, 
+                paycheckConfig.AdditionalMontlyDependentAgeDeduction, 
+                paycheckConfig.ChecksPerMonth, 
+                paycheckConfig.DependentAgeThreshold
+            );
+            employeePaycheckDto.HighWageEarnerDeduction = GetHighWageEarnerPaycheckDeduction(
+                employee.Salary,
+                paycheckConfig.HighWageEarnerSalaryThreshold,
+                paycheckConfig.HighWageEarnerYearlyDeductionRate,
+                paycheckConfig.ChecksPerYear
+            );
 
             responseObject.EmployeeData = employeePaycheckDto;
             responseObject.Status = Status.Success;
             return responseObject;
         }
 
-        private decimal GetDependentPaycheckDeduction(ICollection<GetDependentDto> dependents)
+        private decimal GetDependentPaycheckDeduction(ICollection<GetDependentDto> dependents, decimal monthlyDependentDeduction, decimal monthlyDependentAgeDeduction, decimal paychecksPerMonth, int dependentAgeThreshold)
         {
             if (dependents.Any())
             {
-                return EmployeeHelper.CalculateEmployeeDependentPaycheckDeduction(dependents, _dependentCost, _payChecksPerMonth, _monthlyDependentAgeCharge, _dependantAgeThreshold);
+                return EmployeeHelper.CalculateEmployeeDependentPaycheckDeduction(dependents, monthlyDependentDeduction, paychecksPerMonth, monthlyDependentAgeDeduction, dependentAgeThreshold);
             }
             return 0.00m;
         }
 
-        private decimal GetHighWageEarnerPaycheckDeduction(decimal yearlySalary)
+        private decimal GetHighWageEarnerPaycheckDeduction(decimal yearlySalary, decimal highWageEarnerThreshold, decimal highWageEarnerYearlyDeductionRate, int checksPerYear)
         {
-            if (yearlySalary > _additionalBenefitCostThreshold)
+            if (yearlySalary > highWageEarnerThreshold)
             {
-                return EmployeeHelper.CalculateEmployeeHighWageEarnerPaycheckDeduction(yearlySalary, _highSalaryYearlyCharge, _checksPerYear);
+                return EmployeeHelper.CalculateEmployeeHighWageEarnerPaycheckDeduction(yearlySalary, highWageEarnerYearlyDeductionRate, checksPerYear);
             }
 
             return 0.00m;
