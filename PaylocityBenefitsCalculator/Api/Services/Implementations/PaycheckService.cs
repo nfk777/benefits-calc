@@ -38,56 +38,33 @@ namespace Api.Services.Implementations
 
             var employee = employeeDataResponse.EmployeeData;
             GetEmployeePaycheckDto employeePaycheckDto = new();
-            decimal baseDeduction = CalculateBasePaycheckDeduction(_baseBenefitsCost);
-            decimal dependentDeduction = 0.00m;
-            if (employee.Dependents.Any()) 
-            {
-                dependentDeduction += CalculateDependentPaycheckDeduction(employee.Dependents, _dependentCost);
-            }
-
-            decimal highWageEarnerDeduction = 0.00m;
-            if (employee.Salary > _additionalBenefitCostThreshold)
-            {
-                highWageEarnerDeduction += CalculateHighWageEarnerPaycheckDeduction(employee.Salary);
-            }
-
             employeePaycheckDto.GrossPaycheckSalary = Math.Round(employee.Salary / 26, 2);
-            employeePaycheckDto.BaseBenefitsDeduction = baseDeduction;
-            employeePaycheckDto.DependentsDeduction = dependentDeduction;
-            employeePaycheckDto.HighWageEarnerDeduction = highWageEarnerDeduction;
+            employeePaycheckDto.BaseBenefitsDeduction = EmployeeHelper.CalculateEmployeeBasePaycheckDeduction(_baseBenefitsCost, _payChecksPerMonth);
+            employeePaycheckDto.DependentsDeduction = GetDependentPaycheckDeduction(employee.Dependents);
+            employeePaycheckDto.HighWageEarnerDeduction = GetHighWageEarnerPaycheckDeduction(employee.Salary);
 
             responseObject.EmployeeData = employeePaycheckDto;
             responseObject.Status = Status.Success;
             return responseObject;
         }
 
-        private decimal CalculateBasePaycheckDeduction(decimal baseMonthlyCost)
+        private decimal GetDependentPaycheckDeduction(ICollection<GetDependentDto> dependents)
         {
-            return Math.Round(baseMonthlyCost / _payChecksPerMonth, 2);
+            if (dependents.Any())
+            {
+                return EmployeeHelper.CalculateEmployeeDependentPaycheckDeduction(dependents, _dependentCost, _payChecksPerMonth, _monthlyDependentAgeCharge, _dependantAgeThreshold);
+            }
+            return 0.00m;
         }
 
-        private decimal CalculateDependentPaycheckDeduction(ICollection<GetDependentDto> dependents, decimal monthlyCost)
+        private decimal GetHighWageEarnerPaycheckDeduction(decimal yearlySalary)
         {
-            decimal montlyDependentDeduction = Math.Round(dependents.Count * monthlyCost, 2);
-
-            var today = DateTime.Today;
-            foreach (var dependent in dependents)
+            if (yearlySalary > _additionalBenefitCostThreshold)
             {
-                var dependentAge = EmployeeHelper.CalculateAge(dependent.DateOfBirth, today);
-                if (dependentAge > _dependantAgeThreshold)
-                {
-                    montlyDependentDeduction += _monthlyDependentAgeCharge;
-                }
+                return EmployeeHelper.CalculateEmployeeHighWageEarnerPaycheckDeduction(yearlySalary, _highSalaryYearlyCharge, _checksPerYear);
             }
 
-            decimal perPaycheckDeduction = Math.Round(montlyDependentDeduction / _payChecksPerMonth, 2);
-            return perPaycheckDeduction;
-        }
-
-        private decimal CalculateHighWageEarnerPaycheckDeduction(decimal yearlySalary)
-        {
-            decimal yearlyDeduction = Math.Round(yearlySalary * _highSalaryYearlyCharge);
-            return Math.Round(yearlyDeduction / _checksPerYear);
+            return 0.00m;
         }
     }
 }
