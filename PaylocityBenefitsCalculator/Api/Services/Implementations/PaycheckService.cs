@@ -6,7 +6,7 @@ using Api.Services.Interfaces;
 
 namespace Api.Services.Implementations
 {
-    public class PaycheckService
+    public class PaycheckService : IPaycheckService
     {
         private IEmployeeService _employeeService;
 
@@ -38,10 +38,27 @@ namespace Api.Services.Implementations
 
             var employee = employeeDataResponse.EmployeeData;
             GetEmployeePaycheckDto employeePaycheckDto = new();
+            decimal baseDeduction = CalculateBasePaycheckDeduction(_baseBenefitsCost);
+            decimal dependentDeduction = 0.00m;
+            if (employee.Dependents.Any()) 
+            {
+                dependentDeduction += CalculateDependentPaycheckDeduction(employee.Dependents, _dependentCost);
+            }
+
+            decimal highWageEarnerDeduction = 0.00m;
+            if (employee.Salary > _additionalBenefitCostThreshold)
+            {
+                highWageEarnerDeduction += CalculateHighWageEarnerPaycheckDeduction(employee.Salary);
+            }
 
             employeePaycheckDto.GrossPaycheckSalary = Math.Round(employee.Salary / 26, 2);
+            employeePaycheckDto.BaseBenefitsDeduction = baseDeduction;
+            employeePaycheckDto.DependentsDeduction = dependentDeduction;
+            employeePaycheckDto.HighWageEarnerDeduction = highWageEarnerDeduction;
 
-
+            responseObject.EmployeeData = employeePaycheckDto;
+            responseObject.Status = Status.Success;
+            return responseObject;
         }
 
         private decimal CalculateBasePaycheckDeduction(decimal baseMonthlyCost)
@@ -49,7 +66,7 @@ namespace Api.Services.Implementations
             return Math.Round(baseMonthlyCost / _payChecksPerMonth, 2);
         }
 
-        private decimal CalculateDependentPaycheckDeduction(List<GetDependentDto> dependents, decimal monthlyCost)
+        private decimal CalculateDependentPaycheckDeduction(ICollection<GetDependentDto> dependents, decimal monthlyCost)
         {
             decimal montlyDependentDeduction = Math.Round(dependents.Count * monthlyCost, 2);
 

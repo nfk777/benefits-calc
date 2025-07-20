@@ -3,7 +3,6 @@ using Api.Models;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Net;
 
 namespace Api.Controllers;
 
@@ -12,9 +11,11 @@ namespace Api.Controllers;
 public class EmployeesController : ControllerBase
 {
     private readonly IEmployeeService _employeeService;
-    public EmployeesController(IEmployeeService employeeService)
+    private readonly IPaycheckService _paycheckService;
+    public EmployeesController(IEmployeeService employeeService, IPaycheckService paycheckService)
     {
         _employeeService = employeeService;
+        _paycheckService = paycheckService;
     }
 
     [SwaggerOperation(Summary = "Get all employees")]
@@ -45,6 +46,25 @@ public class EmployeesController : ControllerBase
             return StatusCode(500, employeeDataResponse.Message);
 
         return new ApiResponse<GetEmployeeDto>
+        {
+            Data = employeeDataResponse.EmployeeData,
+            Success = true
+        };
+    }
+
+    [SwaggerOperation(Summary = "Get paycheck for employee with id")]
+    [HttpGet("{id}/Paycheck")]
+    public async Task<ActionResult<ApiResponse<GetEmployeePaycheckDto>>> GetEmployeePaycheck(int id)
+    {
+        var employeeDataResponse = await _paycheckService.GetEmployeePaycheckAsync(id);
+
+        if (employeeDataResponse.Status == Status.NotFound)
+            return NotFound();
+
+        if (employeeDataResponse.Status == Status.InvalidData)
+            return StatusCode(500, employeeDataResponse.Message);
+
+        return new ApiResponse<GetEmployeePaycheckDto>
         {
             Data = employeeDataResponse.EmployeeData,
             Success = true
