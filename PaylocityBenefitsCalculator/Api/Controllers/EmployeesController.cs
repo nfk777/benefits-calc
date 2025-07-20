@@ -11,11 +11,9 @@ namespace Api.Controllers;
 public class EmployeesController : ControllerBase
 {
     private readonly IEmployeeService _employeeService;
-    private readonly IPaycheckService _paycheckService;
-    public EmployeesController(IEmployeeService employeeService, IPaycheckService paycheckService)
+    public EmployeesController(IEmployeeService employeeService)
     {
         _employeeService = employeeService;
-        _paycheckService = paycheckService;
     }
 
     [SwaggerOperation(Summary = "Get all employees")]
@@ -56,7 +54,7 @@ public class EmployeesController : ControllerBase
     [HttpGet("{id}/Paycheck")]
     public async Task<ActionResult<ApiResponse<GetEmployeePaycheckDto>>> GetEmployeePaycheck(int id)
     {
-        var employeeDataResponse = await _paycheckService.GetEmployeePaycheckAsync(id);
+        var employeeDataResponse = await _employeeService.GetEmployeePaycheckAsync(id);
 
         if (employeeDataResponse.Status == Status.NotFound)
             return NotFound();
