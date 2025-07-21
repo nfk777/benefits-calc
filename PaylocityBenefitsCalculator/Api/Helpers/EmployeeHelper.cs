@@ -22,15 +22,21 @@ namespace Api.Helpers
             return Math.Round(baseMonthlyCost / paychecksPerMonth, 2);
         }
 
-        public static decimal CalculateEmployeeDependentPaycheckDeduction(ICollection<GetDependentDto> dependents, decimal monthlyDependentCost, decimal paychecksPerMonth, decimal monthlyDependentAgeCharge, int dependentAgeThreshold)
+        public static decimal CalculateEmployeeDependentPaycheckDeduction(
+            ICollection<GetDependentDto> dependents, 
+            decimal monthlyDependentCost, 
+            decimal paychecksPerMonth, 
+            decimal monthlyDependentAgeCharge, 
+            int dependentAgeThreshold, 
+            DateTime currentDate
+        )
         {
             decimal montlyDependentDeduction = Math.Round(dependents.Count * monthlyDependentCost, 2);
 
-            var today = DateTime.Today;
             foreach (var dependent in dependents)
             {
-                var dependentAge = EmployeeHelper.CalculateAge(dependent.DateOfBirth, today);
-                if (dependentAge > paychecksPerMonth)
+                var dependentAge = CalculateAge(dependent.DateOfBirth, currentDate);
+                if (dependentAge > dependentAgeThreshold)
                 {
                     montlyDependentDeduction += monthlyDependentAgeCharge;
                 }
@@ -40,10 +46,10 @@ namespace Api.Helpers
             return perPaycheckDeduction;
         }
 
-        public static decimal CalculateEmployeeHighWageEarnerPaycheckDeduction(decimal yearlySalary, decimal highSalaryYearlyChargeRate, int checksPerYear)
+        public static decimal CalculateEmployeeHighWageEarnerPaycheckDeduction(decimal yearlySalary, decimal highSalaryYearlyDeductionRate, int checksPerYear)
         {
-            decimal yearlyDeduction = Math.Round(yearlySalary * highSalaryYearlyChargeRate);
-            return Math.Round(yearlyDeduction / checksPerYear);
+            decimal yearlyDeduction = Math.Round(yearlySalary * highSalaryYearlyDeductionRate, 2);
+            return Math.Round(yearlyDeduction / checksPerYear, 2);
         }
     }
 }

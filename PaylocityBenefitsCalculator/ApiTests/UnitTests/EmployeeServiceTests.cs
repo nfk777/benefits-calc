@@ -21,7 +21,8 @@ namespace ApiTests.UnitTests
         {
             _fixture = new Fixture();
             _mockEmployeeRepo = new Mock<IEmployeeRepository>();
-            _sut = new EmployeeService(_mockEmployeeRepo.Object);
+            _mockPaycheckService = new Mock<IPaycheckService>();
+            _sut = new EmployeeService(_mockEmployeeRepo.Object, _mockPaycheckService.Object);
         }
         #region Tests
         [Fact]
@@ -177,6 +178,7 @@ namespace ApiTests.UnitTests
         #region Variables
         private IEmployeeService _sut;
         private Mock<IEmployeeRepository> _mockEmployeeRepo;
+        private Mock<IPaycheckService> _mockPaycheckService;
         private Fixture _fixture;
         private GetEmployeeDto? SomeGetEmployeeDto;
         private EmployeeDataResponse<GetEmployeeDto>? SomeGetEmployeeDataResponse;

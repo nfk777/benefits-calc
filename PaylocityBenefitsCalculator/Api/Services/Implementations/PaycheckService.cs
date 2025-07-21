@@ -49,20 +49,41 @@ namespace Api.Services.Implementations
             return responseObject;
         }
 
-        private decimal GetDependentPaycheckDeduction(ICollection<GetDependentDto> dependents, decimal monthlyDependentDeduction, decimal monthlyDependentAgeDeduction, decimal paychecksPerMonth, int dependentAgeThreshold)
+        private decimal GetDependentPaycheckDeduction(
+            ICollection<GetDependentDto> dependents, 
+            decimal monthlyDependentDeduction, 
+            decimal monthlyDependentAgeDeduction, 
+            decimal paychecksPerMonth, 
+            int dependentAgeThreshold)
         {
             if (dependents.Any())
             {
-                return EmployeeHelper.CalculateEmployeeDependentPaycheckDeduction(dependents, monthlyDependentDeduction, paychecksPerMonth, monthlyDependentAgeDeduction, dependentAgeThreshold);
+                return EmployeeHelper.CalculateEmployeeDependentPaycheckDeduction(
+                    dependents, 
+                    monthlyDependentDeduction, 
+                    paychecksPerMonth, 
+                    monthlyDependentAgeDeduction, 
+                    dependentAgeThreshold,
+                    DateTime.Today
+                );
             }
             return 0.00m;
         }
 
-        private decimal GetHighWageEarnerPaycheckDeduction(decimal yearlySalary, decimal highWageEarnerThreshold, decimal highWageEarnerYearlyDeductionRate, int checksPerYear)
+        private decimal GetHighWageEarnerPaycheckDeduction(
+            decimal yearlySalary, 
+            decimal highWageEarnerThreshold, 
+            decimal highWageEarnerYearlyDeductionRate, 
+            int checksPerYear
+        )
         {
             if (yearlySalary > highWageEarnerThreshold)
             {
-                return EmployeeHelper.CalculateEmployeeHighWageEarnerPaycheckDeduction(yearlySalary, highWageEarnerYearlyDeductionRate, checksPerYear);
+                return EmployeeHelper.CalculateEmployeeHighWageEarnerPaycheckDeduction(
+                    yearlySalary, 
+                    highWageEarnerYearlyDeductionRate, 
+                    checksPerYear
+                );
             }
 
             return 0.00m;
