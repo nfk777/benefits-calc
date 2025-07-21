@@ -9,7 +9,6 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -100,11 +99,12 @@ namespace ApiTests.UnitTests
         }
 
         [Fact]
-        public async Task GetEmployeePaycheckAsync_WhenFoundEmployeeValid_ShouldReturnResponseObjectWithSuccessStatus()
+        public async Task GetEmployeePaycheckAsync_WhenFoundEmployeeValid_ShouldReturnResponseObjectWithExpectedDto()
         {
             GivenValidEmployeeWithPaycheck();
             await WhenGetEmployeePaycheck();
-            ThenResponseEmployeePaycheckDataStatusIsExpectedErrorMessage();
+            ThenResponseEmployeePaycheckDataStatusIsExpectedDto();
+            ThenPaycheckResponseIsSuccess();
         }
         #endregion
 
@@ -163,7 +163,14 @@ namespace ApiTests.UnitTests
         {
             SomeGetEmployeeDto = _fixture
                .Build<GetEmployeeDto>()
+               .With(x => x.Dependents, new List<GetDependentDto>())
                .Create();
+
+            SomeGetEmployeePaycheckResponse = new EmployeeDataResponse<GetEmployeePaycheckDto>()
+            {
+                Status = Status.Success,
+                EmployeeData = SomeEmployeePaycheckDto
+            };
 
             _mockEmployeeRepo.Setup(x => x.GetEmployeeAsync(It.IsAny<int>())).ReturnsAsync(SomeGetEmployeeDto);
             _mockPaycheckService.Setup(e => e.GetEmployeePaycheckAsync(SomeGetEmployeeDto)).ReturnsAsync(SomeGetEmployeePaycheckResponse);
@@ -238,6 +245,11 @@ namespace ApiTests.UnitTests
         private void ThenStatusIsSuccess()
         {
             Assert.Equal(Status.Success, SomeGetEmployeesDataResponse?.Status);
+        }
+
+        private void ThenPaycheckResponseIsSuccess()
+        {
+            Assert.Equal(Status.Success, SomeGetEmployeePaycheckResponse?.Status);
         }
 
         #endregion

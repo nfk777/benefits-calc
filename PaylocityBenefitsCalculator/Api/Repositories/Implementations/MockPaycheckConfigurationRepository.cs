@@ -10,7 +10,7 @@ namespace Api.Repositories.Implementations
         // The idea of having this configuration stored in the database is that we could later associate these records with a companyId, a country code, or some other identifier such that we could retrieve different configurations for different use cases and this method could take the appropriate args to retrieve the right configuration
         // This would also be decoupled from the code in the sense that we could introduce new configurations through a db migration without necessarily having to release or deploy new code
         // As this is a mock implementation, I'm not wrapping the logic for these repo methods in try/catch blocks but I would likely do this in a real implementation especially to log exceptions and to help handle exceptions gracefully
-        public async Task<PaycheckConfiguration> GetPaycheckConfigurationAsync()
+        public async Task<PaycheckConfiguration?> GetPaycheckConfigurationAsync()
         {
             return MockPaycheckConfigurations.FirstOrDefault();
         }

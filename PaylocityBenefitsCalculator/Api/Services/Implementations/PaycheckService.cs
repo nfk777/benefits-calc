@@ -19,7 +19,7 @@ namespace Api.Services.Implementations
             EmployeeDataResponse<GetEmployeePaycheckDto> responseObject = new();
 
             // Get PaycheckConfiguration object and return an invalid data status if no configuration exists as we need it to calculate paychecks
-            PaycheckConfiguration paycheckConfig = await _paycheckConfigRepo.GetPaycheckConfigurationAsync();
+            PaycheckConfiguration? paycheckConfig = await _paycheckConfigRepo.GetPaycheckConfigurationAsync();
             if (paycheckConfig is null)
             {
                 responseObject.Status = Status.InvalidData;
