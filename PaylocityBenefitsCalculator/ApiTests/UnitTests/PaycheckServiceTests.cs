@@ -25,11 +25,21 @@ namespace ApiTests.UnitTests
 
         #region Tests
         [Fact]
-        public async Task GetEmployeePaycheckAsync_WhenPaycheckConfigNull__ShouldReturnResponseObjectWithInvalidDataStatusStatus()
+        public async Task GetEmployeePaycheckAsync_WhenPaycheckConfigNull__ShouldReturnResponseObjectWithInvalidDataStatus()
         {
             GivenNullPaycheckConfiguration();
             GivenEmployee(EmployeeWithoutDependents);
             await WhenGetEmployeePaycheckAsync();
+            ThenResponseStatusIsInvalidData();
+        }
+
+        [Fact]
+        public async Task GetEmployeePaycheckAsync_WhenExceptionThrown_ShouldReturnResponseObjectWithInvalidDataStatusAndMessage()
+        {
+            GivenGetPaycheckConfigThrowsAnException();
+            GivenEmployee(EmployeeWithoutDependents);
+            await WhenGetEmployeePaycheckAsync();
+            ThenResponseObjectHasExpectedMessage();
             ThenResponseStatusIsInvalidData();
         }
 
@@ -68,6 +78,12 @@ namespace ApiTests.UnitTests
         {
             SomeEmployeeDto = employeeDto;
         }
+
+        private void GivenGetPaycheckConfigThrowsAnException()
+        {
+            _mockPaycheckConfigRepo.Setup(p => p.GetPaycheckConfigurationAsync()).ThrowsAsync(new Exception());
+        }
+
         #endregion
 
         #region When
@@ -81,6 +97,11 @@ namespace ApiTests.UnitTests
         private void ThenResponseStatusIsInvalidData()
         {
             Assert.Equal(Status.InvalidData, SomeEmployeeDataResponse?.Status);
+        }
+
+        private void ThenResponseObjectHasExpectedMessage()
+        {
+            Assert.Equal(ExpectedErrorMessage, SomeEmployeeDataResponse?.Message);
         }
 
         private void ThenResponseStatusIsSuccess()
@@ -104,6 +125,7 @@ namespace ApiTests.UnitTests
         private Mock<IPaycheckConfigurationRepository> _mockPaycheckConfigRepo;
         private EmployeeDataResponse<GetEmployeePaycheckDto> SomeEmployeeDataResponse;
         private GetEmployeeDto SomeEmployeeDto;
+        private readonly string ExpectedErrorMessage = "An error occurred calculating employee paycheck, please try again later";
         private readonly PaycheckConfiguration SomePaycheckConfiguration = new()
         {
             BaseBenefitsCost = 1000.00m,

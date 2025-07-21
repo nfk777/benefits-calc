@@ -83,6 +83,7 @@ namespace Api.Services.Implementations
                 };
             }
 
+            // calls the logic in the IPaycheckService to actual calculate the paycheck for the given employee
             return await _paycheckService.GetEmployeePaycheckAsync(employeeDataResponse.EmployeeData);
         }       
     }

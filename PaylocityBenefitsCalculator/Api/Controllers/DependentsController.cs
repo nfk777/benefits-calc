@@ -13,6 +13,8 @@ public class DependentsController : ControllerBase
     private readonly IDependentRepository _dependentRepo;
     public DependentsController(IDependentRepository dependentRepo)
     {
+        // Usually a repo isn't injected directly into a controller. Typically the controller calls a service or provider class that conducts some kind of business logic (even something like authorization checks to ensure that the requestor has access) and returns the desired data to the controller.
+        // In this example, we aren't conducting any business logic on dependents at this time that is relevant to these 2 retrieval methods and so I opted not to add an abstraction just for the sake of having one.
         _dependentRepo = dependentRepo;
     }
 
