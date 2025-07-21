@@ -23,3 +23,14 @@ problem. We’re looking to see your skills in all three tiers so the solution c
 to show our teams your abilities across the board.
 
 Requirements will be given separately.
+
+# Employee Benefit Cost Calculation Api
+This API can be run as originally issued. Moq and Autofixture Nuget packages have been installed into the ApiTests project and those Nuget packages may need to be restored before the project can be build and the tests can be run.
+All given API integrations tests should still pass, as they represent existing contracts.
+
+A new controller endpoint has been introduced for retrieving a calculated paycheck for a given employee id:
+
+<img width="770" height="325" alt="image" src="https://github.com/user-attachments/assets/cbb2d1f1-26a9-4e36-921b-2c74cd6c1e3e" />
+
+
+
