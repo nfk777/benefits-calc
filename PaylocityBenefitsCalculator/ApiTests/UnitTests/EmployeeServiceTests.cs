@@ -26,31 +26,31 @@ namespace ApiTests.UnitTests
         }
         #region Tests
         [Fact]
-        public async Task GetEmployee_WhenNoEmployeeFoundForId_ShouldReturnResponseObjectWithNotFoundStatusCode()
+        public async Task GetEmployeeAsync_WhenNoEmployeeFoundForId_ShouldReturnResponseObjectWithNotFoundStatus()
         {
             GivenNoEmployeeForId();
             await WhenGetEmployee();
-            ThenResponseEmployeeDataStatusCodeIsNotFound();
+            ThenResponseEmployeeDataStatusIsNotFound();
         }
 
         [Fact]
-        public async Task GetEmployee_WhenEmployeeFoundWithInvalidPartners_ShouldReturnResponseObjectWithInternalServerErrorStatusCode()
+        public async Task GetEmployeeAsync_WhenEmployeeFoundWithInvalidPartners_ShouldReturnResponseObjectWithInvalidDataStatusStatus()
         {
             GivenEmployeeWithSomeNumberOfPartners(2);
             await WhenGetEmployee();
-            ThenResponseEmployeeDataStatusCodeIsInternalServerError();
+            ThenResponseEmployeeDataStatusIsInvalidDataStatus();
         }
 
         [Fact]
-        public async Task GetEmployee_WhenEmployeeFoundWithInvalidPartners_ShouldReturnResponseObjectWithExpectedMessage()
+        public async Task GetEmployeeAsync_WhenEmployeeFoundWithInvalidPartners_ShouldReturnResponseObjectWithExpectedMessage()
         {
             GivenEmployeeWithSomeNumberOfPartners(2);
             await WhenGetEmployee();
-            ThenResponseEmployeeDataStatusCodeIsExpectedErrorMessage();
+            ThenResponseEmployeeDataStatusIsExpectedErrorMessage();
         }
 
         [Fact]
-        public async Task GetEmployee_WhenEmployeeFoundWithValidPartners_ShouldReturnResponseObjectWithEmployeeData()
+        public async Task GetEmployeeAsync_WhenEmployeeFoundWithValidPartners_ShouldReturnResponseObjectWithEmployeeData()
         {
             GivenEmployeeWithSomeNumberOfPartners(1);
             await WhenGetEmployee();
@@ -75,6 +75,37 @@ namespace ApiTests.UnitTests
             ThenResponseEmployeeDataIsExpectedDtoList();
         }
 
+        [Fact]
+        public async Task GetEmployeePaycheckAsync_WhenNoEmployeeFoundForId_ShouldReturnResponseObjectWithNotFoundStatus()
+        {
+            GivenNoEmployeeForId();
+            await WhenGetEmployeePaycheck();
+            ThenResponseEmployeePaycheckDataStatusIsNotFound();
+        }
+
+        [Fact]
+        public async Task GetEmployeePaycheckAsync_WhenEmployeeFoundWithInvalidPartners_ShouldReturnResponseObjectWithInvalidDataStatusStatus()
+        {
+            GivenEmployeeWithSomeNumberOfPartners(2);
+            await WhenGetEmployeePaycheck();
+            ThenResponseEmployeePaycheckDataStatusIsInvalidDataStatus();
+        }
+
+        [Fact]
+        public async Task GetEmployeePaycheckAsync_WhenEmployeeFoundWithInvalidPartners_ShouldReturnResponseObjectWithExpectedMessage()
+        {
+            GivenEmployeeWithSomeNumberOfPartners(2);
+            await WhenGetEmployeePaycheck();
+            ThenResponseEmployeePaycheckDataStatusIsExpectedErrorMessage();
+        }
+
+        [Fact]
+        public async Task GetEmployeePaycheckAsync_WhenFoundEmployeeValid_ShouldReturnResponseObjectWithSuccessStatus()
+        {
+            GivenValidEmployeeWithPaycheck();
+            await WhenGetEmployeePaycheck();
+            ThenResponseEmployeePaycheckDataStatusIsExpectedErrorMessage();
+        }
         #endregion
 
         #region Given
@@ -127,12 +158,27 @@ namespace ApiTests.UnitTests
 
             _mockEmployeeRepo.Setup(e => e.GetAllEmployeesAsync()).ReturnsAsync(employeesListWithEmployeeWithTooManyPartners);
         }
+
+        private void GivenValidEmployeeWithPaycheck()
+        {
+            SomeGetEmployeeDto = _fixture
+               .Build<GetEmployeeDto>()
+               .Create();
+
+            _mockEmployeeRepo.Setup(x => x.GetEmployeeAsync(It.IsAny<int>())).ReturnsAsync(SomeGetEmployeeDto);
+            _mockPaycheckService.Setup(e => e.GetEmployeePaycheckAsync(SomeGetEmployeeDto)).ReturnsAsync(SomeGetEmployeePaycheckResponse);
+        }
         #endregion
 
         #region When
         private async Task WhenGetEmployee()
         {
             SomeGetEmployeeDataResponse = await _sut.GetEmployeeAsync(SomeEmployeeId);
+        }
+
+        private async Task WhenGetEmployeePaycheck()
+        {
+            SomeGetEmployeePaycheckResponse = await _sut.GetEmployeePaycheckAsync(SomeEmployeeId);
         }
 
         private async Task WhenGetEmployees()
@@ -142,20 +188,41 @@ namespace ApiTests.UnitTests
         #endregion
 
         #region Then
-        private void ThenResponseEmployeeDataStatusCodeIsNotFound()
+        private void ThenResponseEmployeeDataStatusIsNotFound()
         {
             Assert.Equal(Status.NotFound, SomeGetEmployeeDataResponse?.Status);
         }
 
-        private void ThenResponseEmployeeDataStatusCodeIsInternalServerError()
+        private void ThenResponseEmployeeDataStatusIsInvalidDataStatus()
         {
             Assert.Equal(Status.InvalidData, SomeGetEmployeeDataResponse?.Status);
         }
 
-        private void ThenResponseEmployeeDataStatusCodeIsExpectedErrorMessage()
+        private void ThenResponseEmployeeDataStatusIsExpectedErrorMessage()
         {
             var expectedErrorMessage = $"Employee {SomeGetEmployeeDto?.FirstName} {SomeGetEmployeeDto?.LastName} has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum";
             Assert.Equal(expectedErrorMessage, SomeGetEmployeeDataResponse?.Message);
+        }
+
+        private void ThenResponseEmployeePaycheckDataStatusIsNotFound()
+        {
+            Assert.Equal(Status.NotFound, SomeGetEmployeePaycheckResponse?.Status);
+        }
+
+        private void ThenResponseEmployeePaycheckDataStatusIsInvalidDataStatus()
+        {
+            Assert.Equal(Status.InvalidData, SomeGetEmployeePaycheckResponse?.Status);
+        }
+
+        private void ThenResponseEmployeePaycheckDataStatusIsExpectedErrorMessage()
+        {
+            var expectedErrorMessage = $"Employee {SomeGetEmployeeDto?.FirstName} {SomeGetEmployeeDto?.LastName} has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum";
+            Assert.Equal(expectedErrorMessage, SomeGetEmployeePaycheckResponse?.Message);
+        }
+
+        private void ThenResponseEmployeePaycheckDataStatusIsExpectedDto()
+        {
+            Assert.Equal(SomeEmployeePaycheckDto, SomeGetEmployeePaycheckResponse?.EmployeeData);
         }
 
         private void ThenResponseEmployeeDataIsExpectedDto()
@@ -183,6 +250,7 @@ namespace ApiTests.UnitTests
         private GetEmployeeDto? SomeGetEmployeeDto;
         private EmployeeDataResponse<GetEmployeeDto>? SomeGetEmployeeDataResponse;
         private EmployeeDataResponse<List<GetEmployeeDto>>? SomeGetEmployeesDataResponse;
+        private EmployeeDataResponse<GetEmployeePaycheckDto>? SomeGetEmployeePaycheckResponse;
         private readonly int SomeEmployeeId = 47;
         private List<GetEmployeeDto> SomeGetEmployeeDtos = new();
         private readonly List<GetDependentDto> SomeDependents = new ()
@@ -204,6 +272,14 @@ namespace ApiTests.UnitTests
                 DateOfBirth = new DateTime(2021, 5, 18)
             }
         };
+        private readonly GetEmployeePaycheckDto SomeEmployeePaycheckDto = new GetEmployeePaycheckDto
+        {
+            GrossPaycheckSalary = 5508.12m,
+            BaseBenefitsDeduction = 461.54m,
+            DependentsDeduction = 369.23m,
+            HighWageEarnerDeduction = 110.16m,
+        };
+
         #endregion
 
         #region Helpers
