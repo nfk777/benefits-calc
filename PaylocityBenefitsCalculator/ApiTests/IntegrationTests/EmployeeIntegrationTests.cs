@@ -97,7 +97,7 @@ public class EmployeeIntegrationTests : IntegrationTest
         };
         await response.ShouldReturn(HttpStatusCode.OK, employee);
     }
-    
+
     [Fact]
     public async Task WhenAskedForANonexistentEmployee_ShouldReturn404()
     {
@@ -114,9 +114,44 @@ public class EmployeeIntegrationTests : IntegrationTest
 
     [Fact]
     public async Task WhenAskedForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturnExpectedMessage()
-    { 
+    {
         var response = await HttpClient.GetAsync($"/api/v1/employees/4");
         await response.ShouldReturn("Employee Stacy Fakename has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum");
     }
-}
 
+    [Fact]
+    public async Task WhenAskedForAValidEmployeePaycheck_ShouldReturnCorrectEmployeePaycheck()
+    {
+        var response = await HttpClient.GetAsync("/api/v1/employees/3/paycheck");
+        var paycheck = new GetEmployeePaycheckDto
+        {
+            GrossPaycheckSalary = 5508.12m,
+            BaseBenefitsDeduction = 461.54m,
+            DependentsDeduction = 369.23m,
+            HighWageEarnerDeduction = 110.16m,
+        };
+
+        await response.ShouldReturn(HttpStatusCode.OK, paycheck);
+    }
+
+    [Fact]
+    public async Task WhenAskedForAPaycheckForNonexistentEmployee_ShouldReturn404()
+    {
+        var response = await HttpClient.GetAsync($"/api/v1/employees/{int.MinValue}/paycheck");
+        await response.ShouldReturn(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task WhenAskedForAPaycheckForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturn500()
+    {
+        var response = await HttpClient.GetAsync($"/api/v1/employees/4/paycheck");
+        await response.ShouldReturn(HttpStatusCode.InternalServerError);
+    }
+
+    [Fact]
+    public async Task WhenAskedForAPaycheckForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturnExpectedMessage()
+    {
+        var response = await HttpClient.GetAsync($"/api/v1/employees/4/paycheck");
+        await response.ShouldReturn("Employee Stacy Fakename has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum");
+    }
+}
