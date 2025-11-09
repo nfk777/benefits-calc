@@ -14,9 +14,9 @@ namespace Api.Services.Implementations
         {
             _paycheckConfigRepo = paycheckConfigRepo;
         }
-        public async Task<EmployeeDataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(GetEmployeeDto employeeDto)
+        public async Task<DataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(GetEmployeeDto employeeDto)
         {
-            EmployeeDataResponse<GetEmployeePaycheckDto> responseObject = new();
+            DataResponse<GetEmployeePaycheckDto> responseObject = new();
             // Uses a try/catch block for this operation to try to handle exceptions more gracefully. In the future it might be useful for the EmployerHelper methods that do the calculations to throw specific types of exceptions should they occur so we can be more certain about what part of the logic has encountered an exception
             try
             {
@@ -39,7 +39,7 @@ namespace Api.Services.Implementations
                 employeePaycheckDto.DependentsDeduction = GetDependentPaycheckDeduction(
                     employeeDto.Dependents,
                     paycheckConfig.MonthlyDeductionPerDependent,
-                    paycheckConfig.AdditionalMontlyDependentAgeDeduction,
+                    paycheckConfig.AdditionalMonthlyDependentAgeDeduction,
                     paycheckConfig.ChecksPerMonth,
                     paycheckConfig.DependentAgeThreshold
                 );
@@ -50,7 +50,7 @@ namespace Api.Services.Implementations
                     paycheckConfig.ChecksPerYear
                 );
 
-                responseObject.EmployeeData = employeePaycheckDto;
+                responseObject.Data = employeePaycheckDto;
                 responseObject.Status = Status.Success;
                 return responseObject;
             }

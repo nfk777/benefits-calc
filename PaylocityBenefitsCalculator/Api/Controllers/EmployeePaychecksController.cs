@@ -11,26 +11,28 @@ namespace Api.Controllers
     public class EmployeePaychecksController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
-        public EmployeePaychecksController(IEmployeeService employeeService)
+        private readonly IEmployeePaycheckService _employeePaycheckService;
+        public EmployeePaychecksController(IEmployeePaycheckService employeePaycheckService, IEmployeeService employeeService)
         {
             _employeeService = employeeService;
+            _employeePaycheckService = employeePaycheckService;
         }
 
         [SwaggerOperation(Summary = "Get paycheck for employee with id")]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<GetEmployeePaycheckDto>>> GetEmployeePaycheck(int employeeId)
         {
-            var employeeDataResponse = await _employeeService.GetEmployeePaycheckAsync(employeeId);
+            var dataResponse = await _employeePaycheckService.GetEmployeePaycheckAsync(employeeId);
 
-            if (employeeDataResponse.Status == Status.NotFound)
+            if (dataResponse.Status == Status.NotFound)
                 return NotFound();
 
-            if (employeeDataResponse.Status == Status.InvalidData)
-                return StatusCode(500, employeeDataResponse.Message);
+            if (dataResponse.Status == Status.InvalidData)
+                return StatusCode(500, dataResponse.Message);
 
             return new ApiResponse<GetEmployeePaycheckDto>
             {
-                Data = employeeDataResponse.EmployeeData,
+                Data = dataResponse.Data,
                 Success = true
             };
         }

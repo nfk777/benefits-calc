@@ -20,11 +20,11 @@ public class EmployeesController : ControllerBase
     [HttpGet("")]
     public async Task<ActionResult<ApiResponse<List<GetEmployeeDto>>>> GetAll()
     {
-        var employeeDataResponse = await _employeeService.GetAllAsync();
+        var dataResponse = await _employeeService.GetAllAsync();
 
         var result = new ApiResponse<List<GetEmployeeDto>>
         {
-            Data = employeeDataResponse.EmployeeData,
+            Data = dataResponse.Data,
             Success = true
         };
 
@@ -35,17 +35,17 @@ public class EmployeesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> Get(int id)
     {
-        var employeeDataResponse = await _employeeService.GetEmployeeAsync(id);
+        var dataResponse = await _employeeService.GetEmployeeAsync(id);
 
-        if (employeeDataResponse.Status == Status.NotFound)
+        if (dataResponse.Status == Status.NotFound)
             return NotFound();
 
-        if (employeeDataResponse.Status == Status.InvalidData)
-            return StatusCode(500, employeeDataResponse.Message);
+        if (dataResponse.Status == Status.InvalidData)
+            return StatusCode(500, dataResponse.Message);
 
         return new ApiResponse<GetEmployeeDto>
         {
-            Data = employeeDataResponse.EmployeeData,
+            Data = dataResponse.Data,
             Success = true
         };
     }

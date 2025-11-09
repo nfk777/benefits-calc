@@ -5,8 +5,8 @@ namespace Api.Services.Interfaces
 {
     public interface IEmployeeService
     {
-        Task<EmployeeDataResponse<List<GetEmployeeDto>>> GetAllAsync();
-        Task<EmployeeDataResponse<GetEmployeeDto>> GetEmployeeAsync(int id);
-        Task<EmployeeDataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int id);
+        Task<DataResponse<List<GetEmployeeDto>>> GetAllAsync();
+        Task<DataResponse<GetEmployeeDto>> GetEmployeeAsync(int id);
+        Task<DataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int id);
     }
 }

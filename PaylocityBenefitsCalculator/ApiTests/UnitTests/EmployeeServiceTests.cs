@@ -166,10 +166,10 @@ namespace ApiTests.UnitTests
                .With(x => x.Dependents, new List<GetDependentDto>())
                .Create();
 
-            SomeGetEmployeePaycheckResponse = new EmployeeDataResponse<GetEmployeePaycheckDto>()
+            SomeGetEmployeePaycheckResponse = new DataResponse<GetEmployeePaycheckDto>()
             {
                 Status = Status.Success,
-                EmployeeData = SomeEmployeePaycheckDto
+                Data = SomeEmployeePaycheckDto
             };
 
             _mockEmployeeRepo.Setup(x => x.GetEmployeeAsync(It.IsAny<int>())).ReturnsAsync(SomeGetEmployeeDto);
@@ -180,7 +180,7 @@ namespace ApiTests.UnitTests
         #region When
         private async Task WhenGetEmployee()
         {
-            SomeGetEmployeeDataResponse = await _sut.GetEmployeeAsync(SomeEmployeeId);
+            SomeGetDataResponse = await _sut.GetEmployeeAsync(SomeEmployeeId);
         }
 
         private async Task WhenGetEmployeePaycheck()
@@ -197,18 +197,18 @@ namespace ApiTests.UnitTests
         #region Then
         private void ThenResponseEmployeeDataStatusIsNotFound()
         {
-            Assert.Equal(Status.NotFound, SomeGetEmployeeDataResponse?.Status);
+            Assert.Equal(Status.NotFound, SomeGetDataResponse?.Status);
         }
 
         private void ThenResponseEmployeeDataStatusIsInvalidDataStatus()
         {
-            Assert.Equal(Status.InvalidData, SomeGetEmployeeDataResponse?.Status);
+            Assert.Equal(Status.InvalidData, SomeGetDataResponse?.Status);
         }
 
         private void ThenResponseEmployeeDataStatusIsExpectedErrorMessage()
         {
             var expectedErrorMessage = $"Employee {SomeGetEmployeeDto?.FirstName} {SomeGetEmployeeDto?.LastName} has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum";
-            Assert.Equal(expectedErrorMessage, SomeGetEmployeeDataResponse?.Message);
+            Assert.Equal(expectedErrorMessage, SomeGetDataResponse?.Message);
         }
 
         private void ThenResponseEmployeePaycheckDataStatusIsNotFound()
@@ -229,17 +229,17 @@ namespace ApiTests.UnitTests
 
         private void ThenResponseEmployeePaycheckDataStatusIsExpectedDto()
         {
-            Assert.Equal(SomeEmployeePaycheckDto, SomeGetEmployeePaycheckResponse?.EmployeeData);
+            Assert.Equal(SomeEmployeePaycheckDto, SomeGetEmployeePaycheckResponse?.Data);
         }
 
         private void ThenResponseEmployeeDataIsExpectedDto()
         {
-            Assert.Equal(SomeGetEmployeeDto, SomeGetEmployeeDataResponse?.EmployeeData);
+            Assert.Equal(SomeGetEmployeeDto, SomeGetDataResponse?.Data);
         }
 
         private void ThenResponseEmployeeDataIsExpectedDtoList()
         {
-            Assert.Equal(SomeGetEmployeeDtos, SomeGetEmployeesDataResponse?.EmployeeData);
+            Assert.Equal(SomeGetEmployeeDtos, SomeGetEmployeesDataResponse?.Data);
         }
 
         private void ThenStatusIsSuccess()
@@ -260,9 +260,9 @@ namespace ApiTests.UnitTests
         private Mock<IPaycheckService> _mockPaycheckService;
         private Fixture _fixture;
         private GetEmployeeDto? SomeGetEmployeeDto;
-        private EmployeeDataResponse<GetEmployeeDto>? SomeGetEmployeeDataResponse;
-        private EmployeeDataResponse<List<GetEmployeeDto>>? SomeGetEmployeesDataResponse;
-        private EmployeeDataResponse<GetEmployeePaycheckDto>? SomeGetEmployeePaycheckResponse;
+        private DataResponse<GetEmployeeDto>? SomeGetDataResponse;
+        private DataResponse<List<GetEmployeeDto>>? SomeGetEmployeesDataResponse;
+        private DataResponse<GetEmployeePaycheckDto>? SomeGetEmployeePaycheckResponse;
         private readonly int SomeEmployeeId = 47;
         private List<GetEmployeeDto> SomeGetEmployeeDtos = new();
         private readonly List<GetDependentDto> SomeDependents = new ()

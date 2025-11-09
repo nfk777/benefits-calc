@@ -2,6 +2,7 @@
 {
     public enum Status
     {
+        Unknown,
         NotFound,
         InvalidData,
         Success

@@ -1,7 +1,11 @@
+using Api.Factories.Implementations;
+using Api.Factories.Interfaces;
 using Api.Repositories.Implementations;
 using Api.Repositories.Interfaces;
 using Api.Services.Implementations;
 using Api.Services.Interfaces;
+using Api.Strategies.Implementations;
+using Api.Strategies.Interfaces;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +38,15 @@ builder.Services.AddTransient<IPaycheckService, PaycheckService>();
 builder.Services.AddTransient<IEmployeeRepository, MockEmployeeRepository>();
 builder.Services.AddTransient<IDependentRepository, MockDependentRepository>();
 builder.Services.AddTransient<IPaycheckConfigurationRepository, MockPaycheckConfigurationRepository>();
+builder.Services.AddScoped<IEmployeePaycheckService, EmployeePaycheckService>();
+
+// register strategies
+builder.Services.AddScoped<IDeductionStrategy, BaseBenefitsDeductionStrategy>();
+builder.Services.AddScoped<IDeductionStrategy, DependentsDeductionStrategy>();
+builder.Services.AddScoped<IDeductionStrategy, HighWageEarnerDeductionStrategy>();
+builder.Services.AddScoped<IPaycheckCalculationStrategy, USPaycheckCalculationStrategy>();
+builder.Services.AddScoped<IPaycheckCalculationStrategyFactory, PaycheckCalculationStrategyFactory>();
+builder.Services.AddScoped<IDeductionStrategyFactory, DeductionStrategyFactory>();
 
 var app = builder.Build();
 

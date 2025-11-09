@@ -16,11 +16,11 @@ namespace Api.Services.Implementations
             _paycheckService = paycheckService;
         }
 
-        public async Task<EmployeeDataResponse<List<GetEmployeeDto>>> GetAllAsync()
+        public async Task<DataResponse<List<GetEmployeeDto>>> GetAllAsync()
         {
-            var responseObject = new EmployeeDataResponse<List<GetEmployeeDto>>()
+            var responseObject = new DataResponse<List<GetEmployeeDto>>()
             {
-                EmployeeData = new List<GetEmployeeDto>()
+                Data = new List<GetEmployeeDto>()
             };
 
             var employees = await _employeeRepo.GetAllEmployeesAsync();
@@ -32,11 +32,11 @@ namespace Api.Services.Implementations
             { 
                 if (!employee.Dependents.Any())
                 {
-                    responseObject.EmployeeData.Add(employee);
+                    responseObject.Data.Add(employee);
                 }
                 else if (employee.Dependents.Any() && EmployeeHelper.EmployeePartnersValid(employee.Dependents, 1))
                 {
-                    responseObject.EmployeeData.Add(employee);
+                    responseObject.Data.Add(employee);
                 }
             }
 
@@ -44,9 +44,9 @@ namespace Api.Services.Implementations
             return responseObject;
         }
 
-        public async Task<EmployeeDataResponse<GetEmployeeDto>> GetEmployeeAsync(int id)
+        public async Task<DataResponse<GetEmployeeDto>> GetEmployeeAsync(int id)
         {
-            var responseObject = new EmployeeDataResponse<GetEmployeeDto>();
+            var responseObject = new DataResponse<GetEmployeeDto>();
             var employee = await _employeeRepo.GetEmployeeAsync(id);
             if (employee is null)
             {
@@ -64,19 +64,19 @@ namespace Api.Services.Implementations
                 return responseObject;
             }
 
-            responseObject.EmployeeData = employee;
+            responseObject.Data = employee;
             responseObject.Status = Status.Success;
             return responseObject;
         }
 
-        public async Task<EmployeeDataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int id)
+        public async Task<DataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int id)
         {
             // Get the employee and if the employee is invalid or not found return immediately with appropriate status and error message
             var employeeDataResponse = await GetEmployeeAsync(id);
 
-            if (employeeDataResponse.Status != Status.Success || employeeDataResponse.EmployeeData is null)
+            if (employeeDataResponse.Status != Status.Success || employeeDataResponse.Data is null)
             {
-                return new EmployeeDataResponse<GetEmployeePaycheckDto>()
+                return new DataResponse<GetEmployeePaycheckDto>()
                 {
                     Status = employeeDataResponse.Status,
                     Message = !string.IsNullOrEmpty(employeeDataResponse.Message) ? employeeDataResponse.Message : string.Empty
@@ -84,7 +84,7 @@ namespace Api.Services.Implementations
             }
 
             // calls the logic in the IPaycheckService to actual calculate the paycheck for the given employee
-            return await _paycheckService.GetEmployeePaycheckAsync(employeeDataResponse.EmployeeData);
+            return await _paycheckService.GetEmployeePaycheckAsync(employeeDataResponse.Data);
         }       
     }
 }

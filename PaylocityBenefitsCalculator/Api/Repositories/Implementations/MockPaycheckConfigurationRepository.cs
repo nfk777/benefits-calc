@@ -24,8 +24,10 @@ namespace Api.Repositories.Implementations
                 HighWageEarnerSalaryThreshold = 80000.00m,
                 HighWageEarnerYearlyDeductionRate = 0.02m,
                 DependentAgeThreshold = 50,
-                AdditionalMontlyDependentAgeDeduction = 200.00m,
-                ChecksPerYear = 26
+                AdditionalMonthlyDependentAgeDeduction = 200.00m,
+                ChecksPerYear = 26,
+                CountryCode = CountryCode.US,
+                MaximumPartners = 1
             }
         };
     }

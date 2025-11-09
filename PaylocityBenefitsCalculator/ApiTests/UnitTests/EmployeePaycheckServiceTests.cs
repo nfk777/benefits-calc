@@ -14,10 +14,10 @@ using Xunit;
 
 namespace ApiTests.UnitTests
 {
-    public class PaycheckServiceTests
+    public class EmployeePaycheckServiceTests
     {
 
-        public PaycheckServiceTests() 
+        public EmployeePaycheckServiceTests() 
         { 
             _mockPaycheckConfigRepo = new Mock<IPaycheckConfigurationRepository>();
             _sut = new PaycheckService(_mockPaycheckConfigRepo.Object);
@@ -89,29 +89,29 @@ namespace ApiTests.UnitTests
         #region When
         private async Task WhenGetEmployeePaycheckAsync()
         {
-            SomeEmployeeDataResponse = await _sut.GetEmployeePaycheckAsync(SomeEmployeeDto);
+            SomeDataResponse = await _sut.GetEmployeePaycheckAsync(SomeEmployeeDto);
         }
         #endregion
 
         #region Then
         private void ThenResponseStatusIsInvalidData()
         {
-            Assert.Equal(Status.InvalidData, SomeEmployeeDataResponse?.Status);
+            Assert.Equal(Status.InvalidData, SomeDataResponse?.Status);
         }
 
         private void ThenResponseObjectHasExpectedMessage()
         {
-            Assert.Equal(ExpectedErrorMessage, SomeEmployeeDataResponse?.Message);
+            Assert.Equal(ExpectedErrorMessage, SomeDataResponse?.Message);
         }
 
         private void ThenResponseStatusIsSuccess()
         {
-            Assert.Equal(Status.Success, SomeEmployeeDataResponse?.Status);
+            Assert.Equal(Status.Success, SomeDataResponse?.Status);
         }
 
         private void ThenResponseObjectDtoHasExpectedValues(GetEmployeePaycheckDto expectedDto)
         {
-            GetEmployeePaycheckDto actualDto = SomeEmployeeDataResponse.EmployeeData!;
+            GetEmployeePaycheckDto actualDto = SomeDataResponse.Data!;
             Assert.Equal(expectedDto.GrossPaycheckSalary, actualDto.GrossPaycheckSalary);
             Assert.Equal(expectedDto.BaseBenefitsDeduction, actualDto.BaseBenefitsDeduction);
             Assert.Equal(expectedDto.DependentsDeduction, actualDto.DependentsDeduction);
@@ -123,7 +123,7 @@ namespace ApiTests.UnitTests
 
         #region Variables
         private Mock<IPaycheckConfigurationRepository> _mockPaycheckConfigRepo;
-        private EmployeeDataResponse<GetEmployeePaycheckDto> SomeEmployeeDataResponse;
+        private DataResponse<GetEmployeePaycheckDto> SomeDataResponse;
         private GetEmployeeDto SomeEmployeeDto;
         private readonly string ExpectedErrorMessage = "An error occurred calculating employee paycheck, please try again later";
         private readonly PaycheckConfiguration SomePaycheckConfiguration = new()
@@ -133,7 +133,7 @@ namespace ApiTests.UnitTests
             HighWageEarnerSalaryThreshold = 80000.00m,
             HighWageEarnerYearlyDeductionRate = 0.02m,
             DependentAgeThreshold = 50,
-            AdditionalMontlyDependentAgeDeduction = 200.00m,
+            AdditionalMonthlyDependentAgeDeduction = 200.00m,
             ChecksPerYear = 26
         };
         private static readonly GetEmployeeDto EmployeeWithoutDependents = new()

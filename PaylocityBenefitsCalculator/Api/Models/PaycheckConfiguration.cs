@@ -6,8 +6,10 @@
         public decimal MonthlyDeductionPerDependent { get; set; }
         public decimal HighWageEarnerSalaryThreshold { get; set; }
         public decimal HighWageEarnerYearlyDeductionRate {  get; set; }
-        public decimal AdditionalMontlyDependentAgeDeduction { get; set; }
+        public decimal AdditionalMonthlyDependentAgeDeduction { get; set; }
+        public CountryCode CountryCode { get; set; }
         public int DependentAgeThreshold { get; set; }
+        public int MaximumPartners { get; set; }
         public int ChecksPerYear { get; set; }
         public decimal ChecksPerMonth 
         { 
