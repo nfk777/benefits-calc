@@ -7,6 +7,5 @@ namespace Api.Services.Interfaces
     {
         Task<DataResponse<List<GetEmployeeDto>>> GetAllAsync();
         Task<DataResponse<GetEmployeeDto>> GetEmployeeAsync(int id);
-        Task<DataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int id);
     }
 }

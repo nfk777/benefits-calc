@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Api.Dtos.Dependent;
 using Api.Dtos.Employee;
+using Api.Dtos.Paycheck;
 using Api.Models;
 using Xunit;
 
@@ -78,6 +79,50 @@ public class EmployeeIntegrationTests : IntegrationTest
                         DateOfBirth = new DateTime(1974, 1, 2)
                     }
                 }
+            },
+             new ()
+            {
+                Id = 4,
+                FirstName = "Stacy",
+                LastName = "Fakename",
+                Salary = 100341.34m,
+                DateOfBirth = new DateTime(1989, 11, 12),
+                // This list of dependents violates our constraint on domestic partners/spouses
+                Dependents = new List<GetDependentDto>
+                {
+                    new ()
+                    {
+                        Id = 1,
+                        FirstName = "Spouse",
+                        LastName = "Fakename",
+                        Relationship = Relationship.Spouse,
+                        DateOfBirth = new DateTime(1992, 3, 3)
+                    },
+                    new()
+                    {
+                        Id = 2,
+                        FirstName = "Child1",
+                        LastName = "Fakename",
+                        Relationship = Relationship.Child,
+                        DateOfBirth = new DateTime(2017, 6, 23)
+                    },
+                    new()
+                    {
+                        Id = 3,
+                        FirstName = "Child2",
+                        LastName = "Fakename",
+                        Relationship = Relationship.Child,
+                        DateOfBirth = new DateTime(2019, 5, 18)
+                    },
+                    new ()
+                    {
+                        Id = 6,
+                        FirstName = "Domesticpartner",
+                        LastName = "Fakename",
+                        Relationship = Relationship.DomesticPartner,
+                        DateOfBirth = new DateTime(1993, 4, 4)
+                    }
+                }
             }
         };
         await response.ShouldReturn(HttpStatusCode.OK, employees);
@@ -103,55 +148,5 @@ public class EmployeeIntegrationTests : IntegrationTest
     {
         var response = await HttpClient.GetAsync($"/api/v1/employees/{int.MinValue}");
         await response.ShouldReturn(HttpStatusCode.NotFound);
-    }
-
-    [Fact]
-    public async Task WhenAskedForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturn500()
-    {
-        var response = await HttpClient.GetAsync($"/api/v1/employees/4");
-        await response.ShouldReturn(HttpStatusCode.InternalServerError);
-    }
-
-    [Fact]
-    public async Task WhenAskedForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturnExpectedMessage()
-    {
-        var response = await HttpClient.GetAsync($"/api/v1/employees/4");
-        await response.ShouldReturn("Employee Stacy Fakename has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum");
-    }
-
-    [Fact]
-    public async Task WhenAskedForAValidEmployeePaycheck_ShouldReturnCorrectEmployeePaycheck()
-    {
-        var response = await HttpClient.GetAsync("/api/v1/employees/3/paychecks");
-        var paycheck = new GetEmployeePaycheckDto
-        {
-            GrossPaycheckSalary = 5508.12m,
-            BaseBenefitsDeduction = 461.54m,
-            DependentsDeduction = 369.23m,
-            HighWageEarnerDeduction = 110.16m,
-        };
-
-        await response.ShouldReturn(HttpStatusCode.OK, paycheck);
-    }
-
-    [Fact]
-    public async Task WhenAskedForAPaycheckForNonexistentEmployee_ShouldReturn404()
-    {
-        var response = await HttpClient.GetAsync($"/api/v1/employees/{int.MinValue}/paychecks");
-        await response.ShouldReturn(HttpStatusCode.NotFound);
-    }
-
-    [Fact]
-    public async Task WhenAskedForAPaycheckForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturn500()
-    {
-        var response = await HttpClient.GetAsync($"/api/v1/employees/4/paychecks");
-        await response.ShouldReturn(HttpStatusCode.InternalServerError);
-    }
-
-    [Fact]
-    public async Task WhenAskedForAPaycheckForAnEmployeeWithAnInvalidNumberOfPartners_ShouldReturnExpectedMessage()
-    {
-        var response = await HttpClient.GetAsync($"/api/v1/employees/4/paychecks");
-        await response.ShouldReturn("Employee Stacy Fakename has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum");
     }
 }

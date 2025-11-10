@@ -19,8 +19,8 @@ namespace Api.Strategies.Implementations
             
             if (employeeDto.Salary > paycheckConfig.HighWageEarnerSalaryThreshold)
             {
-                decimal yearlyDeduction = Math.Round(employeeDto.Salary * paycheckConfig.HighWageEarnerYearlyDeductionRate, 2);
-                deduction = Math.Round(yearlyDeduction / paycheckConfig.ChecksPerYear, 2);
+                decimal yearlyDeduction = Math.Round(employeeDto.Salary * paycheckConfig.HighWageEarnerYearlyDeductionRate, 2, MidpointRounding.ToEven);
+                deduction = Math.Round(yearlyDeduction / paycheckConfig.ChecksPerYear, 2, MidpointRounding.ToEven);
             }
             
             return new DeductionDto(DEDUCTION_NAME, deduction);

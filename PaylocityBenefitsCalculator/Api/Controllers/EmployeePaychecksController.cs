@@ -18,6 +18,7 @@ namespace Api.Controllers
             _employeePaycheckService = employeePaycheckService;
         }
 
+        // @auth: Admin or Employee with the given employee id
         [SwaggerOperation(Summary = "Get paycheck for employee with id")]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<GetEmployeePaycheckDto>>> GetEmployeePaycheck(int employeeId)

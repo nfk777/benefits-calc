@@ -23,7 +23,7 @@ namespace Api.Strategies.Implementations
             // Due to the float and double utilizing binary-floating point arithmetic trying to execute precise decimal calculations can lead to rounding errors and imprecisions
             // Decimal uses base-10 arithmetic and is meant to handle decimals accurately, such as in currency
             // Decimal arithmetic is less performant, but within the requirements of this application I have chosen to favor precision
-            employeePaycheckDto.GrossPaycheckSalary = Math.Round(employeeDto.Salary / paycheckConfig.ChecksPerYear, 2);
+            employeePaycheckDto.GrossPaycheckSalary = Math.Round(employeeDto.Salary / paycheckConfig.ChecksPerYear, 2, MidpointRounding.ToEven);
 
             var deductionStrategies = _deductionStrategyFactory.GetStrategiesByLocation(CountryCode);
 
@@ -33,7 +33,7 @@ namespace Api.Strategies.Implementations
                 employeePaycheckDto.Deductions.Add(deductionDto);
             }
 
-            employeePaycheckDto.TotalBenefitsDeduction = Math.Round(employeePaycheckDto.Deductions.Sum(x => x.Deduction), 2);
+            employeePaycheckDto.TotalBenefitsDeduction = Math.Round(employeePaycheckDto.Deductions.Sum(x => x.Deduction), 2, MidpointRounding.ToEven);
             employeePaycheckDto.NetPaycheckSalary = employeePaycheckDto.GrossPaycheckSalary - employeePaycheckDto.TotalBenefitsDeduction;
 
             return employeePaycheckDto;

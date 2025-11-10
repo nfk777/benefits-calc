@@ -12,17 +12,17 @@ namespace Api.Services.Implementations
     public class EmployeePaycheckService : IEmployeePaycheckService
     {
         private readonly IPaycheckConfigurationRepository _paycheckConfigRepo;
-        private readonly IEmployeeService _employeeReadService;
+        private readonly IEmployeeService _employeeService;
         private readonly IPaycheckCalculationStrategyFactory _paycheckCalculationStrategyFactory;
 
         public EmployeePaycheckService(
             IPaycheckConfigurationRepository paycheckConfigRepo, 
-            IEmployeeService employeeReadService,
+            IEmployeeService employeeService,
             IPaycheckCalculationStrategyFactory paycheckCalculationStrategyFactory
             ) 
         {
             _paycheckConfigRepo = paycheckConfigRepo;
-            _employeeReadService = employeeReadService;
+            _employeeService = employeeService;
             _paycheckCalculationStrategyFactory = paycheckCalculationStrategyFactory;
         }
         public async Task<DataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int employeeId)
@@ -32,7 +32,7 @@ namespace Api.Services.Implementations
             try
             {
                 // Get employee dto and return not found data status if no employee found for id
-                var getEmployeeResponse = await _employeeReadService.GetEmployeeAsync(employeeId);
+                var getEmployeeResponse = await _employeeService.GetEmployeeAsync(employeeId);
                 if (getEmployeeResponse.Status is not Status.Success || getEmployeeResponse.Data is null)
                 {
                     responseObject.Status = Status.NotFound;
@@ -53,7 +53,7 @@ namespace Api.Services.Implementations
                 if (employeeDto.Dependents.Any() && !EmployeeHelper.EmployeePartnersValid(employeeDto.Dependents, paycheckConfig.MaximumPartners))
                 {
                     responseObject.Status = Status.InvalidData;
-                    responseObject.Message = $"Employee has exceeded the maximum number of partners: {paycheckConfig.MaximumPartners}";
+                    responseObject.Message = $"Employee {employeeDto.FirstName} {employeeDto.LastName} has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum";
                     return responseObject;
                 }
 

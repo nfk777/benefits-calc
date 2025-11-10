@@ -23,7 +23,7 @@ namespace Api.Strategies.Implementations
             if (dependents.Any())
             {
                 // Calculate the initial monthly deduction of dependents
-                decimal monthlyDependentDeduction = Math.Round(dependents.Count * paycheckConfig.MonthlyDeductionPerDependent, 2);
+                decimal monthlyDependentDeduction = Math.Round(dependents.Count * paycheckConfig.MonthlyDeductionPerDependent, 2, MidpointRounding.ToEven);
 
                 // Add additional deduction for each dependent exceeding the age threshold
                 foreach (var dependent in dependents)
@@ -36,7 +36,7 @@ namespace Api.Strategies.Implementations
                 }
 
                 // Divide the total monthly dependent deduction over projected paychecks per month to determine the amount per pay check
-                deduction = Math.Round(monthlyDependentDeduction / paycheckConfig.ChecksPerMonth, 2);
+                deduction = Math.Round(monthlyDependentDeduction / paycheckConfig.ChecksPerMonth, 2, MidpointRounding.ToEven);
             }
 
             return new DeductionDto(DEDUCTION_NAME, deduction);

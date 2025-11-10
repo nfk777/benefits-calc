@@ -9,15 +9,15 @@ namespace Api.Services.Implementations
     public class EmployeeService : IEmployeeService
     {
         private IEmployeeRepository _employeeRepo;
-        private IPaycheckService _paycheckService;
-        public EmployeeService(IEmployeeRepository employeeRepo, IPaycheckService paycheckService)
+        public EmployeeService(IEmployeeRepository employeeRepo)
         {
             _employeeRepo = employeeRepo;
-            _paycheckService = paycheckService;
         }
 
         public async Task<DataResponse<List<GetEmployeeDto>>> GetAllAsync()
         {
+            // As noted in the consuming controller, this method should accept Limit and Offset pagination params
+            // This method would then need to validate the pagination args, such as ensuring the submitted Limit doesn't exceed some configured maximum for example
             var responseObject = new DataResponse<List<GetEmployeeDto>>()
             {
                 Data = new List<GetEmployeeDto>()
@@ -25,21 +25,7 @@ namespace Api.Services.Implementations
 
             var employees = await _employeeRepo.GetAllEmployeesAsync();
 
-            // In the event that the collection includes an employee whose data is in a faulted state (their number of spoues/domestic partners exceeds the established maximum), I have opted to remove them from the returned collection rather than returning an error that would cause the entire collection to not be returned. 
-            // As noted below, I would expect that normally client-side, server-side, and db constraints would prevent write operations from creating data in this state but if we had data in our system that pre-dates said validations we could use this approach to validate in code since our Repos are currently mocked
-            // Were we to replace our MockEmployeeRepository with a real repository we could push this logic down to the query and test the query itself with an in-memory db like sqlite or the one that EF comes with
-            foreach (var employee in employees) 
-            { 
-                if (!employee.Dependents.Any())
-                {
-                    responseObject.Data.Add(employee);
-                }
-                else if (employee.Dependents.Any() && EmployeeHelper.EmployeePartnersValid(employee.Dependents, 1))
-                {
-                    responseObject.Data.Add(employee);
-                }
-            }
-
+            responseObject.Data = employees.ToList();
             responseObject.Status = Status.Success;
             return responseObject;
         }
@@ -54,37 +40,9 @@ namespace Api.Services.Implementations
                 return responseObject;
             }
 
-            // In the event that we have an employee whose data is in a faulted state (their number of spoues/domestic partners exceeds the established maximum) we return 500 to indicate that our data for this employee is invalid but there was no issue with the request
-            // We would normally expect that data should not be in this state because validations for write operations to enforce this rule should exist on the client, server, and probably also be enforced via db constraints
-            // We could enforce this at the repo level (return null if no employee with this id found that violates our constraint) but there is some value of handling it here so that we can apply business logic (what if we wanted to return a message indicating that the client data is faulted, as below?)
-            if (employee.Dependents.Any() && !EmployeeHelper.EmployeePartnersValid(employee.Dependents, 1))
-            {
-                responseObject.Status = Status.InvalidData;
-                responseObject.Message = $"Employee {employee.FirstName} {employee.LastName} has claimed a number of spouse(s)/domestic partner(s) that exceeds the allowed maximum";
-                return responseObject;
-            }
-
             responseObject.Data = employee;
             responseObject.Status = Status.Success;
             return responseObject;
         }
-
-        public async Task<DataResponse<GetEmployeePaycheckDto>> GetEmployeePaycheckAsync(int id)
-        {
-            // Get the employee and if the employee is invalid or not found return immediately with appropriate status and error message
-            var employeeDataResponse = await GetEmployeeAsync(id);
-
-            if (employeeDataResponse.Status != Status.Success || employeeDataResponse.Data is null)
-            {
-                return new DataResponse<GetEmployeePaycheckDto>()
-                {
-                    Status = employeeDataResponse.Status,
-                    Message = !string.IsNullOrEmpty(employeeDataResponse.Message) ? employeeDataResponse.Message : string.Empty
-                };
-            }
-
-            // calls the logic in the IPaycheckService to actual calculate the paycheck for the given employee
-            return await _paycheckService.GetEmployeePaycheckAsync(employeeDataResponse.Data);
-        }       
     }
 }

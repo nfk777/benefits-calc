@@ -7,7 +7,6 @@
             Name = name;
             Deduction = deduction;
         }
-
         public string Name { get; }
         public decimal Deduction { get; }
     }

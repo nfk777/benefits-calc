@@ -16,10 +16,13 @@ public class EmployeesController : ControllerBase
         _employeeService = employeeService;
     }
 
+    // @auth: Admin
     [SwaggerOperation(Summary = "Get all employees")]
     [HttpGet("")]
     public async Task<ActionResult<ApiResponse<List<GetEmployeeDto>>>> GetAll()
     {
+        // This endpoint should be paginated with values for "Limit" and "Offset" from FromQuery string params
+        // These params should have default values such that we don't return the entire result set if they are left empty
         var dataResponse = await _employeeService.GetAllAsync();
 
         var result = new ApiResponse<List<GetEmployeeDto>>
@@ -31,6 +34,7 @@ public class EmployeesController : ControllerBase
         return result;
     }
 
+    // @auth: Admin or Employee with Id (self)
     [SwaggerOperation(Summary = "Get employee by id")]
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> Get(int id)

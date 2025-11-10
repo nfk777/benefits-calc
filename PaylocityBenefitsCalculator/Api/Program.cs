@@ -33,11 +33,10 @@ builder.Services.AddCors(options =>
         policy => { policy.WithOrigins("http://localhost:3000", "http://localhost"); });
 });
 
-builder.Services.AddTransient<IEmployeeService, EmployeeService>();
-builder.Services.AddTransient<IPaycheckService, PaycheckService>();
-builder.Services.AddTransient<IEmployeeRepository, MockEmployeeRepository>();
-builder.Services.AddTransient<IDependentRepository, MockDependentRepository>();
-builder.Services.AddTransient<IPaycheckConfigurationRepository, MockPaycheckConfigurationRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IEmployeeRepository, MockEmployeeRepository>();
+builder.Services.AddScoped<IDependentRepository, MockDependentRepository>();
+builder.Services.AddScoped<IPaycheckConfigurationRepository, MockPaycheckConfigurationRepository>();
 builder.Services.AddScoped<IEmployeePaycheckService, EmployeePaycheckService>();
 
 // register strategies

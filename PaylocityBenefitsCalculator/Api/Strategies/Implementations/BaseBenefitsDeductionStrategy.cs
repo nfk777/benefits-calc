@@ -15,7 +15,7 @@ namespace Api.Strategies.Implementations
         public DeductionDto Calculate(PaycheckConfiguration paycheckConfig, GetEmployeeDto employeeDto)
         {
             // Round decimal math to 2 for currency
-            decimal deduction = Math.Round(paycheckConfig.BaseBenefitsCost / paycheckConfig.ChecksPerMonth, 2);
+            decimal deduction = Math.Round(paycheckConfig.BaseBenefitsCost / paycheckConfig.ChecksPerMonth, 2, MidpointRounding.ToEven);
             
             return new DeductionDto(DEDUCTION_NAME, deduction);
         }
