@@ -34,7 +34,7 @@ namespace Api.Strategies.Implementations
             }
 
             employeePaycheckDto.TotalBenefitsDeduction = Math.Round(employeePaycheckDto.Deductions.Sum(x => x.Deduction), 2, MidpointRounding.ToEven);
-            employeePaycheckDto.NetPaycheckSalary = employeePaycheckDto.GrossPaycheckSalary - employeePaycheckDto.TotalBenefitsDeduction;
+            employeePaycheckDto.NetPaycheckSalary = Math.Round(employeePaycheckDto.GrossPaycheckSalary - employeePaycheckDto.TotalBenefitsDeduction, 2, MidpointRounding.ToEven);
 
             return employeePaycheckDto;
         }
